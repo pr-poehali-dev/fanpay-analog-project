@@ -32,6 +32,12 @@ export default function Index() {
   const [offers, setOffers] = useState({});
   const [selectedItemForOffer, setSelectedItemForOffer] = useState(null);
   
+  // User balance and deposit system
+  const [userBalance, setUserBalance] = useState(5420);
+  const [depositAmount, setDepositAmount] = useState('');
+  const [isDepositOpen, setIsDepositOpen] = useState(false);
+  const [isTradeModalOpen, setIsTradeModalOpen] = useState(false);
+  
   const onlineUsers = [
     { name: 'ProGamer123', avatar: 'PG', status: 'Торгует' },
     { name: 'ClashMaster', avatar: 'CM', status: 'В игре' },
@@ -185,6 +191,23 @@ export default function Index() {
     setSelectedItemForOffer(null);
   };
 
+  const handleDeposit = () => {
+    if (depositAmount && parseInt(depositAmount) > 0) {
+      setUserBalance(prev => prev + parseInt(depositAmount));
+      setDepositAmount('');
+      setIsDepositOpen(false);
+    }
+  };
+
+  const handlePurchase = (item) => {
+    if (userBalance >= item.price) {
+      setUserBalance(prev => prev - item.price);
+      alert(`Успешно куплен ${item.name} за ₽${item.price}!`);
+    } else {
+      alert('Недостаточно средств на балансе!');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       {/* Header */}
@@ -193,7 +216,7 @@ export default function Index() {
           <nav className="flex items-center justify-between">
             <div className="flex items-center space-x-8">
               <h1 className="text-2xl font-bold text-white bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">
-                GameMarket
+                NapoliFshop
               </h1>
               <div className="hidden md:flex space-x-6">
                 <a href="#" className="text-white hover:text-blue-400 transition-colors">Главная</a>
@@ -210,6 +233,77 @@ export default function Index() {
                 />
                 <Icon name="Search" className="absolute right-3 top-3 h-4 w-4 text-white/70" />
               </div>
+              
+              {/* Balance Display */}
+              <div className="flex items-center space-x-2 bg-white/10 px-4 py-2 rounded-lg">
+                <Icon name="Wallet" size={16} className="text-green-400" />
+                <span className="text-white font-medium">₽{userBalance.toLocaleString()}</span>
+                <Dialog open={isDepositOpen} onOpenChange={setIsDepositOpen}>
+                  <DialogTrigger asChild>
+                    <Button size="sm" variant="outline" className="border-green-400/50 text-green-400 hover:bg-green-400/10">
+                      <Icon name="Plus" size={14} />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="bg-slate-900 border-white/20 text-white">
+                    <DialogHeader>
+                      <DialogTitle>Пополнить баланс</DialogTitle>
+                      <DialogDescription className="text-white/70">
+                        Добавьте средства для покупки предметов
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div className="text-center p-4 bg-white/5 rounded-lg">
+                        <div className="text-white/70 text-sm">Текущий баланс</div>
+                        <div className="text-2xl font-bold text-green-400">₽{userBalance.toLocaleString()}</div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <label className="text-white text-sm font-medium">Сумма пополнения</label>
+                        <Input
+                          type="number"
+                          value={depositAmount}
+                          onChange={(e) => setDepositAmount(e.target.value)}
+                          placeholder="Введите сумму..."
+                          className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                        />
+                      </div>
+                      
+                      <div className="grid grid-cols-3 gap-2">
+                        <Button 
+                          variant="outline" 
+                          onClick={() => setDepositAmount('1000')}
+                          className="border-white/30 text-white hover:bg-white/10"
+                        >
+                          ₽1,000
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          onClick={() => setDepositAmount('5000')}
+                          className="border-white/30 text-white hover:bg-white/10"
+                        >
+                          ₽5,000
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          onClick={() => setDepositAmount('10000')}
+                          className="border-white/30 text-white hover:bg-white/10"
+                        >
+                          ₽10,000
+                        </Button>
+                      </div>
+                      
+                      <Button 
+                        onClick={handleDeposit}
+                        disabled={!depositAmount || parseInt(depositAmount) <= 0}
+                        className="w-full bg-green-600 hover:bg-green-700"
+                      >
+                        Пополнить баланс
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
+              
               <Avatar>
                 <AvatarImage src="/placeholder.svg" />
                 <AvatarFallback>U</AvatarFallback>
@@ -229,9 +323,113 @@ export default function Index() {
             Безопасная торговая площадка для игровых предметов с мгновенными сделками и встроенным чатом
           </p>
           <div className="flex justify-center space-x-4 animate-scale-in">
-            <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-8 py-3 text-lg">
-              Начать торговать
-            </Button>
+            <Dialog open={isTradeModalOpen} onOpenChange={setIsTradeModalOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-8 py-3 text-lg">
+                  Начать торговать
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="bg-slate-900 border-white/20 text-white max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>Добро пожаловать в торговлю!</DialogTitle>
+                  <DialogDescription className="text-white/70">
+                    Изучите возможности NapoliFshop для успешной торговли
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Card className="bg-white/5 border-white/20">
+                      <CardHeader className="pb-3">
+                        <div className="flex items-center space-x-2">
+                          <Icon name="ShoppingCart" size={20} className="text-blue-400" />
+                          <CardTitle className="text-white text-lg">Покупка</CardTitle>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="text-white/80 text-sm">
+                        <ul className="space-y-1">
+                          <li>• Просматривайте каталог предметов</li>
+                          <li>• Пополняйте баланс через кнопку "+"</li>
+                          <li>• Покупайте в один клик</li>
+                        </ul>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card className="bg-white/5 border-white/20">
+                      <CardHeader className="pb-3">
+                        <div className="flex items-center space-x-2">
+                          <Icon name="HandCoins" size={20} className="text-orange-400" />
+                          <CardTitle className="text-white text-lg">Торги</CardTitle>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="text-white/80 text-sm">
+                        <ul className="space-y-1">
+                          <li>• Предлагайте свою цену</li>
+                          <li>• Отслеживайте статус предложений</li>
+                          <li>• Торгуйтесь с продавцами</li>
+                        </ul>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card className="bg-white/5 border-white/20">
+                      <CardHeader className="pb-3">
+                        <div className="flex items-center space-x-2">
+                          <Icon name="MessageCircle" size={20} className="text-green-400" />
+                          <CardTitle className="text-white text-lg">Общение</CardTitle>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="text-white/80 text-sm">
+                        <ul className="space-y-1">
+                          <li>• Чат с продавцами в карточках</li>
+                          <li>• Общий чат сообщества</li>
+                          <li>• Онлайн поддержка</li>
+                        </ul>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card className="bg-white/5 border-white/20">
+                      <CardHeader className="pb-3">
+                        <div className="flex items-center space-x-2">
+                          <Icon name="Shield" size={20} className="text-purple-400" />
+                          <CardTitle className="text-white text-lg">Безопасность</CardTitle>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="text-white/80 text-sm">
+                        <ul className="space-y-1">
+                          <li>• Защищённые платежи</li>
+                          <li>• Проверенные продавцы</li>
+                          <li>• Гарантия возврата</li>
+                        </ul>
+                      </CardContent>
+                    </Card>
+                  </div>
+                  
+                  <div className="text-center p-4 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-lg">
+                    <div className="text-white font-medium mb-2">Ваш текущий баланс</div>
+                    <div className="text-2xl font-bold text-green-400 mb-2">₽{userBalance.toLocaleString()}</div>
+                    <Button 
+                      onClick={() => {
+                        setIsTradeModalOpen(false);
+                        setIsDepositOpen(true);
+                      }}
+                      variant="outline" 
+                      className="border-green-400/50 text-green-400 hover:bg-green-400/10"
+                    >
+                      <Icon name="Plus" size={16} className="mr-2" />
+                      Пополнить баланс
+                    </Button>
+                  </div>
+                  
+                  <div className="flex justify-center">
+                    <Button 
+                      onClick={() => setIsTradeModalOpen(false)}
+                      className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+                    >
+                      Начать торговать!
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
             <Button variant="outline" className="border-white/30 text-white hover:bg-white/10 px-8 py-3 text-lg">
               Узнать больше
             </Button>
@@ -299,8 +497,16 @@ export default function Index() {
                   )}
                 </CardContent>
                 <CardFooter className="flex space-x-2">
-                  <Button className="flex-1 bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600">
-                    Купить
+                  <Button 
+                    onClick={() => handlePurchase(item)}
+                    disabled={userBalance < item.price}
+                    className={`flex-1 ${
+                      userBalance >= item.price 
+                        ? 'bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600' 
+                        : 'bg-gray-600 cursor-not-allowed'
+                    }`}
+                  >
+                    {userBalance >= item.price ? 'Купить' : 'Недостаточно средств'}
                   </Button>
                   <Dialog>
                     <DialogTrigger asChild>
@@ -517,8 +723,16 @@ export default function Index() {
                   </div>
                 </CardContent>
                 <CardFooter className="flex space-x-2">
-                  <Button className="flex-1 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white">
-                    Купить
+                  <Button 
+                    onClick={() => handlePurchase(item)}
+                    disabled={userBalance < item.price}
+                    className={`flex-1 ${
+                      userBalance >= item.price 
+                        ? 'bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white' 
+                        : 'bg-gray-600 cursor-not-allowed text-white'
+                    }`}
+                  >
+                    {userBalance >= item.price ? 'Купить' : 'Недостаточно средств'}
                   </Button>
                   <Dialog>
                     <DialogTrigger asChild>
@@ -577,7 +791,7 @@ export default function Index() {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
-              <h4 className="text-white font-bold mb-4">GameMarket</h4>
+              <h4 className="text-white font-bold mb-4">NapoliFshop</h4>
               <p className="text-white/70 text-sm">
                 Безопасная торговая площадка для игровых предметов
               </p>
@@ -608,7 +822,7 @@ export default function Index() {
             </div>
           </div>
           <div className="border-t border-white/10 mt-8 pt-8 text-center text-white/70 text-sm">
-            © 2024 GameMarket. Все права защищены.
+            © 2024 NapoliFshop. Все права защищены.
           </div>
         </div>
       </footer>

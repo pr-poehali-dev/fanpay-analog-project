@@ -49,6 +49,75 @@ export default function Index() {
     }
   ];
 
+  const supercellItems = [
+    {
+      id: 4,
+      name: 'Мега Рыцарь',
+      price: 890,
+      rarity: 'Легендарная',
+      game: 'Clash Royale',
+      image: '/placeholder.svg',
+      seller: 'ClashMaster',
+      condition: 'Максимальный уровень',
+      type: 'Карта'
+    },
+    {
+      id: 5,
+      name: 'Аккаунт ТХ14',
+      price: 4500,
+      rarity: 'Эпический',
+      game: 'Clash of Clans',
+      image: '/placeholder.svg',
+      seller: 'ClanLeader',
+      condition: 'Полностью прокачан',
+      type: 'Аккаунт'
+    },
+    {
+      id: 6,
+      name: 'Леон + скин',
+      price: 1800,
+      rarity: 'Мифическая',
+      game: 'Brawl Stars',
+      image: '/placeholder.svg',
+      seller: 'BrawlPro',
+      condition: 'Сила 11',
+      type: 'Боec'
+    },
+    {
+      id: 7,
+      name: 'Принцесс + Лог',
+      price: 650,
+      rarity: 'Легендарная',
+      game: 'Clash Royale',
+      image: '/placeholder.svg',
+      seller: 'RoyaleKing',
+      condition: '2 легендарки',
+      type: 'Комбо'
+    },
+    {
+      id: 8,
+      name: 'Спайк Сакура',
+      price: 2200,
+      rarity: 'Мифическая',
+      game: 'Brawl Stars',
+      image: '/placeholder.svg',
+      seller: 'SuperBrawler',
+      condition: 'Редкий скин',
+      type: 'Боец + скин'
+    },
+    {
+      id: 9,
+      name: 'База ТХ13 + гемы',
+      price: 3200,
+      rarity: 'Эпический',
+      game: 'Clash of Clans',
+      image: '/placeholder.svg',
+      seller: 'GemMaster',
+      condition: '10к гемов',
+      type: 'Аккаунт'
+    }
+  ];
+
   const sendMessage = () => {
     if (newMessage.trim()) {
       setChatMessages([...chatMessages, { 
@@ -194,6 +263,155 @@ export default function Index() {
                         <DialogTitle>Чат с продавцом</DialogTitle>
                         <DialogDescription className="text-white/70">
                           Обсудите детали покупки предмета "{item.name}"
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div className="h-60 overflow-y-auto space-y-2 p-4 bg-white/5 rounded-lg">
+                          {chatMessages.map((msg) => (
+                            <div key={msg.id} className={`flex ${msg.user === 'Вы' ? 'justify-end' : 'justify-start'}`}>
+                              <div className={`max-w-xs px-3 py-2 rounded-lg ${
+                                msg.user === 'Вы' 
+                                  ? 'bg-blue-600 text-white' 
+                                  : 'bg-white/10 text-white'
+                              }`}>
+                                <div className="text-sm">{msg.message}</div>
+                                <div className="text-xs opacity-70 mt-1">{msg.time}</div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="flex space-x-2">
+                          <Textarea
+                            value={newMessage}
+                            onChange={(e) => setNewMessage(e.target.value)}
+                            placeholder="Введите сообщение..."
+                            className="bg-white/10 border-white/20 text-white placeholder:text-white/70"
+                            rows={2}
+                          />
+                          <Button onClick={sendMessage} className="bg-blue-600 hover:bg-blue-700">
+                            <Icon name="Send" size={16} />
+                          </Button>
+                        </div>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Supercell Games Section */}
+      <section className="py-20 bg-gradient-to-r from-orange-900/20 via-yellow-900/20 to-red-900/20">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h3 className="text-4xl font-bold text-white mb-4">Игры Supercell</h3>
+            <p className="text-xl text-white/80 max-w-2xl mx-auto">
+              Торгуй аккаунтами, картами и предметами из популярных мобильных игр
+            </p>
+          </div>
+          
+          {/* Game Categories */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+            <Card className="bg-gradient-to-br from-blue-600/20 to-purple-600/20 backdrop-blur-sm border-white/20 hover:scale-105 transition-transform duration-300">
+              <CardHeader className="text-center">
+                <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                  <Icon name="Crown" size={32} className="text-white" />
+                </div>
+                <CardTitle className="text-white text-xl">Clash Royale</CardTitle>
+                <CardDescription className="text-white/70">
+                  Легендарные карты и аккаунты
+                </CardDescription>
+              </CardHeader>
+            </Card>
+            
+            <Card className="bg-gradient-to-br from-green-600/20 to-yellow-600/20 backdrop-blur-sm border-white/20 hover:scale-105 transition-transform duration-300">
+              <CardHeader className="text-center">
+                <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-green-500 to-yellow-600 rounded-full flex items-center justify-center">
+                  <Icon name="Castle" size={32} className="text-white" />
+                </div>
+                <CardTitle className="text-white text-xl">Clash of Clans</CardTitle>
+                <CardDescription className="text-white/70">
+                  Прокачанные базы и ресурсы
+                </CardDescription>
+              </CardHeader>
+            </Card>
+            
+            <Card className="bg-gradient-to-br from-pink-600/20 to-red-600/20 backdrop-blur-sm border-white/20 hover:scale-105 transition-transform duration-300">
+              <CardHeader className="text-center">
+                <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-pink-500 to-red-600 rounded-full flex items-center justify-center">
+                  <Icon name="Zap" size={32} className="text-white" />
+                </div>
+                <CardTitle className="text-white text-xl">Brawl Stars</CardTitle>
+                <CardDescription className="text-white/70">
+                  Редкие бойцы и скины
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </div>
+
+          {/* Supercell Items Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {supercellItems.map((item, index) => (
+              <Card 
+                key={item.id} 
+                className="bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20 transition-all duration-300 hover:scale-105 animate-fade-in"
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
+                <CardHeader>
+                  <div className="flex justify-between items-start mb-2">
+                    <Badge 
+                      variant="secondary" 
+                      className={`
+                        ${item.game === 'Clash Royale' ? 'bg-blue-600' : ''}
+                        ${item.game === 'Clash of Clans' ? 'bg-green-600' : ''}
+                        ${item.game === 'Brawl Stars' ? 'bg-pink-600' : ''}
+                      `}
+                    >
+                      {item.game}
+                    </Badge>
+                    <Badge 
+                      className={`
+                        ${item.rarity === 'Легендарная' ? 'bg-orange-500' : ''}
+                        ${item.rarity === 'Мифическая' ? 'bg-purple-500' : ''}
+                        ${item.rarity === 'Эпический' ? 'bg-blue-500' : ''}
+                      `}
+                    >
+                      {item.rarity}
+                    </Badge>
+                  </div>
+                  <div className="w-full h-32 bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-lg mb-4 flex items-center justify-center">
+                    {item.game === 'Clash Royale' && <Icon name="Crown" size={48} className="text-white/50" />}
+                    {item.game === 'Clash of Clans' && <Icon name="Castle" size={48} className="text-white/50" />}
+                    {item.game === 'Brawl Stars' && <Icon name="Zap" size={48} className="text-white/50" />}
+                  </div>
+                  <CardTitle className="text-white">{item.name}</CardTitle>
+                  <CardDescription className="text-white/70">
+                    {item.type} • {item.condition}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex justify-between items-center mb-4">
+                    <span className="text-2xl font-bold text-yellow-400">₽{item.price}</span>
+                    <span className="text-white/70">от {item.seller}</span>
+                  </div>
+                </CardContent>
+                <CardFooter className="flex space-x-2">
+                  <Button className="flex-1 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white">
+                    Купить
+                  </Button>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" className="border-white/30 text-white hover:bg-white/10">
+                        <Icon name="MessageCircle" size={16} />
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="bg-slate-900 border-white/20 text-white">
+                      <DialogHeader>
+                        <DialogTitle>Чат с продавцом</DialogTitle>
+                        <DialogDescription className="text-white/70">
+                          Обсудите детали покупки "{item.name}" в {item.game}
                         </DialogDescription>
                       </DialogHeader>
                       <div className="space-y-4">

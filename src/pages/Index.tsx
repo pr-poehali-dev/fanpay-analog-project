@@ -15,6 +15,24 @@ export default function Index() {
     { id: 2, user: 'Вы', message: 'Да, какая цена?', time: '14:33' }
   ]);
   const [newMessage, setNewMessage] = useState('');
+  
+  // Global chat state
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [globalChatMessages, setGlobalChatMessages] = useState([
+    { id: 1, user: 'ProGamer123', avatar: 'PG', message: 'Ищу AK-47 Redline до 2000 рублей', time: '14:20', online: true },
+    { id: 2, user: 'ClashMaster', avatar: 'CM', message: 'Продаю аккаунт ТХ14, все вопросы в личку', time: '14:25', online: true },
+    { id: 3, user: 'BrawlPro', avatar: 'BP', message: 'Кто знает когда будет скидка на гемы в Brawl Stars?', time: '14:28', online: false },
+    { id: 4, user: 'DotaKing', avatar: 'DK', message: 'Обменяю Драконий Коготь на скины CS2', time: '14:30', online: true },
+    { id: 5, user: 'SpaceLord', avatar: 'SL', message: 'Всем привет! Новичок тут, как лучше продавать?', time: '14:35', online: true }
+  ]);
+  const [globalNewMessage, setGlobalNewMessage] = useState('');
+  
+  const onlineUsers = [
+    { name: 'ProGamer123', avatar: 'PG', status: 'Торгует' },
+    { name: 'ClashMaster', avatar: 'CM', status: 'В игре' },
+    { name: 'DotaKing', avatar: 'DK', status: 'Онлайн' },
+    { name: 'SpaceLord', avatar: 'SL', status: 'Продает' }
+  ];
 
   const gameItems = [
     {
@@ -127,6 +145,20 @@ export default function Index() {
         time: new Date().toLocaleTimeString().slice(0, 5)
       }]);
       setNewMessage('');
+    }
+  };
+
+  const sendGlobalMessage = () => {
+    if (globalNewMessage.trim()) {
+      setGlobalChatMessages([...globalChatMessages, { 
+        id: globalChatMessages.length + 1, 
+        user: 'Вы', 
+        avatar: 'Y',
+        message: globalNewMessage, 
+        time: new Date().toLocaleTimeString().slice(0, 5),
+        online: true
+      }]);
+      setGlobalNewMessage('');
     }
   };
 
@@ -554,6 +586,113 @@ export default function Index() {
           </div>
         </div>
       </footer>
+
+      {/* Global Chat */}
+      {isChatOpen && (
+        <div className="fixed bottom-4 right-4 w-96 h-[500px] bg-slate-900/95 backdrop-blur-md border border-white/20 rounded-lg shadow-2xl animate-scale-in z-50">
+          <div className="flex items-center justify-between p-4 border-b border-white/20">
+            <div className="flex items-center space-x-2">
+              <Icon name="Users" size={20} className="text-blue-400" />
+              <h3 className="text-white font-semibold">Общий чат</h3>
+              <Badge className="bg-green-500/20 text-green-400 text-xs">
+                {onlineUsers.length} онлайн
+              </Badge>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsChatOpen(false)}
+              className="text-white/70 hover:text-white hover:bg-white/10"
+            >
+              <Icon name="X" size={16} />
+            </Button>
+          </div>
+          
+          <div className="flex h-[400px]">
+            {/* Chat Messages */}
+            <div className="flex-1 flex flex-col">
+              <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                {globalChatMessages.map((msg) => (
+                  <div key={msg.id} className="flex items-start space-x-2">
+                    <Avatar className="w-6 h-6">
+                      <AvatarFallback className="text-xs bg-blue-600 text-white">
+                        {msg.avatar}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center space-x-2">
+                        <span className="text-white text-sm font-medium">{msg.user}</span>
+                        {msg.online && (
+                          <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                        )}
+                        <span className="text-white/50 text-xs">{msg.time}</span>
+                      </div>
+                      <p className="text-white/80 text-sm mt-1 break-words">{msg.message}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              {/* Message Input */}
+              <div className="p-4 border-t border-white/20">
+                <div className="flex space-x-2">
+                  <Input
+                    value={globalNewMessage}
+                    onChange={(e) => setGlobalNewMessage(e.target.value)}
+                    placeholder="Написать сообщение..."
+                    className="flex-1 bg-white/10 border-white/20 text-white placeholder:text-white/50 text-sm"
+                    onKeyPress={(e) => e.key === 'Enter' && sendGlobalMessage()}
+                  />
+                  <Button 
+                    onClick={sendGlobalMessage}
+                    size="sm"
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    <Icon name="Send" size={14} />
+                  </Button>
+                </div>
+              </div>
+            </div>
+            
+            {/* Online Users */}
+            <div className="w-32 border-l border-white/20 p-3">
+              <h4 className="text-white/70 text-xs font-medium mb-3 uppercase tracking-wide">
+                Онлайн
+              </h4>
+              <div className="space-y-2">
+                {onlineUsers.map((user) => (
+                  <div key={user.name} className="flex items-center space-x-2">
+                    <div className="relative">
+                      <Avatar className="w-6 h-6">
+                        <AvatarFallback className="text-xs bg-green-600 text-white">
+                          {user.avatar}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-green-400 rounded-full border border-slate-900"></div>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-white text-xs font-medium truncate">
+                        {user.name}
+                      </div>
+                      <div className="text-white/50 text-xs truncate">
+                        {user.status}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Chat Toggle Button */}
+      <Button
+        onClick={() => setIsChatOpen(!isChatOpen)}
+        className="fixed bottom-4 right-4 w-14 h-14 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 shadow-lg z-40"
+      >
+        <Icon name={isChatOpen ? "X" : "MessageCircle"} size={24} className="text-white" />
+      </Button>
     </div>
   );
 }

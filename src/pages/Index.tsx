@@ -27,6 +27,11 @@ export default function Index() {
   ]);
   const [globalNewMessage, setGlobalNewMessage] = useState('');
   
+  // Trading system state
+  const [offerPrice, setOfferPrice] = useState('');
+  const [offers, setOffers] = useState({});
+  const [selectedItemForOffer, setSelectedItemForOffer] = useState(null);
+  
   const onlineUsers = [
     { name: 'ProGamer123', avatar: 'PG', status: 'Торгует' },
     { name: 'ClashMaster', avatar: 'CM', status: 'В игре' },
@@ -162,6 +167,24 @@ export default function Index() {
     }
   };
 
+  const makeOffer = (itemId, price) => {
+    const newOffer = {
+      id: Date.now(),
+      itemId,
+      price: parseInt(price),
+      time: new Date().toLocaleTimeString().slice(0, 5),
+      status: 'pending'
+    };
+    
+    setOffers(prev => ({
+      ...prev,
+      [itemId]: [...(prev[itemId] || []), newOffer]
+    }));
+    
+    setOfferPrice('');
+    setSelectedItemForOffer(null);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       {/* Header */}
@@ -216,29 +239,7 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-16 bg-white/5 backdrop-blur-sm">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-white mb-2">50K+</div>
-              <div className="text-white/70">Активных пользователей</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-white mb-2">1M+</div>
-              <div className="text-white/70">Успешных сделок</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-white mb-2">24/7</div>
-              <div className="text-white/70">Поддержка</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-white mb-2">100%</div>
-              <div className="text-white/70">Безопасность</div>
-            </div>
-          </div>
-        </div>
-      </section>
+
 
       {/* Featured Items */}
       <section className="py-20">
@@ -279,11 +280,97 @@ export default function Index() {
                     <span className="text-2xl font-bold text-green-400">₽{item.price}</span>
                     <span className="text-white/70">от {item.seller}</span>
                   </div>
+                  
+                  {/* Offers */}
+                  {offers[item.id] && offers[item.id].length > 0 && (
+                    <div className="mt-4 p-3 bg-white/5 rounded-lg">
+                      <h4 className="text-white text-sm font-medium mb-2">Предложения:</h4>
+                      <div className="space-y-1">
+                        {offers[item.id].slice(-2).map((offer) => (
+                          <div key={offer.id} className="flex justify-between items-center text-xs">
+                            <span className="text-white/70">₽{offer.price}</span>
+                            <Badge variant="outline" className="text-xs">
+                              {offer.status === 'pending' ? 'Ожидает' : offer.status}
+                            </Badge>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
                 <CardFooter className="flex space-x-2">
                   <Button className="flex-1 bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600">
                     Купить
                   </Button>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" className="border-orange-400/50 text-orange-400 hover:bg-orange-400/10">
+                        <Icon name="HandCoins" size={16} />
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="bg-slate-900 border-white/20 text-white">
+                      <DialogHeader>
+                        <DialogTitle>Предложить цену</DialogTitle>
+                        <DialogDescription className="text-white/70">
+                          Предложите свою цену за "{item.name}"
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4">
+                        <div className="text-center p-4 bg-white/5 rounded-lg">
+                          <div className="text-white/70 text-sm">Текущая цена</div>
+                          <div className="text-2xl font-bold text-green-400">₽{item.price}</div>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <label className="text-white text-sm font-medium">Ваше предложение</label>
+                          <Input
+                            type="number"
+                            value={offerPrice}
+                            onChange={(e) => setOfferPrice(e.target.value)}
+                            placeholder="Введите цену..."
+                            className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                          />
+                        </div>
+                        
+                        <div className="flex space-x-2">
+                          <Button 
+                            onClick={() => makeOffer(item.id, offerPrice)}
+                            disabled={!offerPrice || parseInt(offerPrice) <= 0}
+                            className="flex-1 bg-orange-600 hover:bg-orange-700"
+                          >
+                            Отправить предложение
+                          </Button>
+                        </div>
+                        
+                        {offers[item.id] && offers[item.id].length > 0 && (
+                          <div className="mt-4 p-3 bg-white/5 rounded-lg">
+                            <h4 className="text-white text-sm font-medium mb-2">Ваши предложения:</h4>
+                            <div className="space-y-2">
+                              {offers[item.id].map((offer) => (
+                                <div key={offer.id} className="flex justify-between items-center">
+                                  <span className="text-white/70">₽{offer.price}</span>
+                                  <div className="flex items-center space-x-2">
+                                    <span className="text-xs text-white/50">{offer.time}</span>
+                                    <Badge 
+                                      variant="outline" 
+                                      className={`text-xs ${
+                                        offer.status === 'pending' ? 'text-yellow-400 border-yellow-400/50' : 
+                                        offer.status === 'accepted' ? 'text-green-400 border-green-400/50' : 
+                                        'text-red-400 border-red-400/50'
+                                      }`}
+                                    >
+                                      {offer.status === 'pending' ? 'Ожидает' : 
+                                       offer.status === 'accepted' ? 'Принято' : 'Отклонено'}
+                                    </Badge>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                   <Dialog>
                     <DialogTrigger asChild>
                       <Button variant="outline" className="border-white/30 text-white hover:bg-white/10">
@@ -483,68 +570,7 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Profile Section */}
-      <section className="py-20 bg-white/5 backdrop-blur-sm">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
-            <h3 className="text-3xl font-bold text-white mb-12 text-center">Профиль пользователя</h3>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <Card className="bg-white/10 backdrop-blur-sm border-white/20">
-                <CardHeader className="text-center">
-                  <Avatar className="w-20 h-20 mx-auto mb-4">
-                    <AvatarImage src="/placeholder.svg" />
-                    <AvatarFallback className="text-2xl">PG</AvatarFallback>
-                  </Avatar>
-                  <CardTitle className="text-white">ProGamer123</CardTitle>
-                  <CardDescription className="text-white/70">Активен 5 мин назад</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2 text-white/80">
-                    <div className="flex justify-between">
-                      <span>Рейтинг:</span>
-                      <span className="text-yellow-400">★★★★★ 4.9</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Сделки:</span>
-                      <span>247</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>На площадке:</span>
-                      <span>2 года</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
 
-              <Card className="lg:col-span-2 bg-white/10 backdrop-blur-sm border-white/20">
-                <CardHeader>
-                  <CardTitle className="text-white">Статистика торговли</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="text-center p-4 bg-white/5 rounded-lg">
-                      <div className="text-2xl font-bold text-green-400">₽127,500</div>
-                      <div className="text-white/70">Общий оборот</div>
-                    </div>
-                    <div className="text-center p-4 bg-white/5 rounded-lg">
-                      <div className="text-2xl font-bold text-blue-400">15</div>
-                      <div className="text-white/70">Активных лотов</div>
-                    </div>
-                    <div className="text-center p-4 bg-white/5 rounded-lg">
-                      <div className="text-2xl font-bold text-purple-400">₽8,200</div>
-                      <div className="text-white/70">Средний чек</div>
-                    </div>
-                    <div className="text-center p-4 bg-white/5 rounded-lg">
-                      <div className="text-2xl font-bold text-orange-400">98%</div>
-                      <div className="text-white/70">Успешность</div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Footer */}
       <footer className="bg-slate-900/50 backdrop-blur-sm border-t border-white/10 py-12">

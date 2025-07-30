@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,8 +7,13 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import Icon from '@/components/ui/icon';
+import AuthModal from '@/components/AuthModal';
 
 export default function Index() {
+  // Auth state
+  const [user, setUser] = useState(null);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
+  
   const [selectedItem, setSelectedItem] = useState(null);
   const [chatMessages, setChatMessages] = useState([
     { id: 1, user: 'Продавец', message: 'Привет! Интересуешься этим предметом?', time: '14:32' },
@@ -20,10 +25,9 @@ export default function Index() {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [globalChatMessages, setGlobalChatMessages] = useState([
     { id: 1, user: 'ProGamer123', avatar: 'PG', message: 'Ищу AK-47 Redline до 2000 рублей', time: '14:20', online: true },
-    { id: 2, user: 'ClashMaster', avatar: 'CM', message: 'Продаю аккаунт ТХ14, все вопросы в личку', time: '14:25', online: true },
-    { id: 3, user: 'BrawlPro', avatar: 'BP', message: 'Кто знает когда будет скидка на гемы в Brawl Stars?', time: '14:28', online: false },
-    { id: 4, user: 'DotaKing', avatar: 'DK', message: 'Обменяю Драконий Коготь на скины CS2', time: '14:30', online: true },
-    { id: 5, user: 'SpaceLord', avatar: 'SL', message: 'Всем привет! Новичок тут, как лучше продавать?', time: '14:35', online: true }
+    { id: 2, user: 'ClashMaster', avatar: 'CM', message: 'Кто знает когда будет скидка на гемы в Brawl Stars?', time: '14:28', online: false },
+    { id: 3, user: 'DotaKing', avatar: 'DK', message: 'Обменяю Драконий Коготь на скины CS2', time: '14:30', online: true },
+    { id: 4, user: 'SpaceLord', avatar: 'SL', message: 'Всем привет! Новичок тут, как лучше продавать?', time: '14:35', online: true }
   ]);
   const [globalNewMessage, setGlobalNewMessage] = useState('');
   
@@ -33,7 +37,13 @@ export default function Index() {
   const [selectedItemForOffer, setSelectedItemForOffer] = useState(null);
   
   // User balance and deposit system
-  const [userBalance, setUserBalance] = useState(5420);
+  const [userBalance, setUserBalance] = useState(user?.balance || 0);
+  
+  useEffect(() => {
+    if (user) {
+      setUserBalance(user.balance);
+    }
+  }, [user]);
   const [depositAmount, setDepositAmount] = useState('');
   const [isDepositOpen, setIsDepositOpen] = useState(false);
   const [isTradeModalOpen, setIsTradeModalOpen] = useState(false);
@@ -44,6 +54,16 @@ export default function Index() {
     { name: 'DotaKing', avatar: 'DK', status: 'Онлайн' },
     { name: 'SpaceLord', avatar: 'SL', status: 'Продает' }
   ];
+  
+  const handleLogin = (userData) => {
+    setUser(userData);
+    setUserBalance(userData.balance);
+  };
+  
+  const handleLogout = () => {
+    setUser(null);
+    setUserBalance(0);
+  };
 
   const gameItems = [
     {
@@ -160,11 +180,11 @@ export default function Index() {
   };
 
   const sendGlobalMessage = () => {
-    if (globalNewMessage.trim()) {
+    if (globalNewMessage.trim() && user) {
       setGlobalChatMessages([...globalChatMessages, { 
         id: globalChatMessages.length + 1, 
-        user: 'Вы', 
-        avatar: 'Y',
+        user: user.name, 
+        avatar: user.name?.substring(0, 2).toUpperCase() || 'U',
         message: globalNewMessage, 
         time: new Date().toLocaleTimeString().slice(0, 5),
         online: true
@@ -214,30 +234,33 @@ export default function Index() {
       <header className="border-b border-white/10 backdrop-blur-sm bg-white/5">
         <div className="container mx-auto px-4 py-4">
           <nav className="flex items-center justify-between">
-            <div className="flex items-center space-x-8">
-              <h1 className="text-2xl font-bold text-white bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">
+            <div className="flex items-center space-x-4 md:space-x-8">
+              <h1 className="text-xl md:text-2xl font-bold text-white bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">
                 NapoliFshop
               </h1>
-              <div className="hidden md:flex space-x-6">
+              <div className="hidden lg:flex space-x-6">
                 <a href="#" className="text-white hover:text-blue-400 transition-colors">Главная</a>
                 <a href="#" className="text-white hover:text-blue-400 transition-colors">Каталог</a>
                 <a href="#" className="text-white hover:text-blue-400 transition-colors">Продать</a>
                 <a href="#" className="text-white hover:text-blue-400 transition-colors">Помощь</a>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
-              <div className="relative">
+            <div className="flex items-center space-x-2 md:space-x-4">
+              {/* Search - только на десктопе */}
+              <div className="relative hidden md:block">
                 <Input 
                   placeholder="Поиск предметов..." 
-                  className="w-64 bg-white/10 border-white/20 text-white placeholder:text-white/70"
+                  className="w-48 lg:w-64 bg-white/10 border-white/20 text-white placeholder:text-white/70"
                 />
                 <Icon name="Search" className="absolute right-3 top-3 h-4 w-4 text-white/70" />
               </div>
               
-              {/* Balance Display */}
-              <div className="flex items-center space-x-2 bg-white/10 px-4 py-2 rounded-lg">
-                <Icon name="Wallet" size={16} className="text-green-400" />
-                <span className="text-white font-medium">₽{userBalance.toLocaleString()}</span>
+              {user ? (
+                <>
+                  {/* Balance Display */}
+                  <div className="flex items-center space-x-1 md:space-x-2 bg-white/10 px-2 md:px-4 py-2 rounded-lg">
+                    <Icon name="Wallet" size={14} className="text-green-400" />
+                    <span className="text-white font-medium text-sm md:text-base">₽{userBalance.toLocaleString()}</span>
                 <Dialog open={isDepositOpen} onOpenChange={setIsDepositOpen}>
                   <DialogTrigger asChild>
                     <Button size="sm" variant="outline" className="border-green-400/50 text-green-400 hover:bg-green-400/10">
@@ -301,34 +324,162 @@ export default function Index() {
                       </Button>
                     </div>
                   </DialogContent>
-                </Dialog>
-              </div>
-              
-              <Avatar>
-                <AvatarImage src="/placeholder.svg" />
-                <AvatarFallback>U</AvatarFallback>
-              </Avatar>
+                    <Dialog open={isDepositOpen} onOpenChange={setIsDepositOpen}>
+                      <DialogTrigger asChild>
+                        <Button size="sm" variant="outline" className="border-green-400/50 text-green-400 hover:bg-green-400/10 p-1 md:p-2">
+                          <Icon name="Plus" size={12} className="md:hidden" />
+                          <Icon name="Plus" size={14} className="hidden md:block" />
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="bg-slate-900 border-white/20 text-white">
+                        <DialogHeader>
+                          <DialogTitle>Пополнить баланс</DialogTitle>
+                          <DialogDescription className="text-white/70">
+                            Добавьте средства для покупки предметов
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          <div className="text-center p-4 bg-white/5 rounded-lg">
+                            <div className="text-white/70 text-sm">Текущий баланс</div>
+                            <div className="text-2xl font-bold text-green-400">₽{userBalance.toLocaleString()}</div>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <label className="text-white text-sm font-medium">Сумма пополнения</label>
+                            <Input
+                              type="number"
+                              value={depositAmount}
+                              onChange={(e) => setDepositAmount(e.target.value)}
+                              placeholder="Введите сумму..."
+                              className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                            />
+                          </div>
+                          
+                          <div className="grid grid-cols-3 gap-2">
+                            <Button 
+                              variant="outline" 
+                              onClick={() => setDepositAmount('1000')}
+                              className="border-white/30 text-white hover:bg-white/10"
+                            >
+                              ₽1,000
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              onClick={() => setDepositAmount('5000')}
+                              className="border-white/30 text-white hover:bg-white/10"
+                            >
+                              ₽5,000
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              onClick={() => setDepositAmount('10000')}
+                              className="border-white/30 text-white hover:bg-white/10"
+                            >
+                              ₽10,000
+                            </Button>
+                          </div>
+                          
+                          <Button 
+                            onClick={handleDeposit}
+                            disabled={!depositAmount || parseInt(depositAmount) <= 0}
+                            className="w-full bg-green-600 hover:bg-green-700"
+                          >
+                            Пополнить баланс
+                          </Button>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+                  
+                  {/* User Menu */}
+                  <div className="flex items-center space-x-2">
+                    <Avatar className="w-8 h-8 md:w-10 md:h-10">
+                      {user.avatar ? (
+                        <AvatarImage src={user.avatar} />
+                      ) : (
+                        <AvatarFallback className="bg-blue-600 text-white text-xs md:text-sm">
+                          {user.name?.substring(0, 2).toUpperCase() || 'U'}
+                        </AvatarFallback>
+                      )}
+                    </Avatar>
+                    <div className="hidden md:block">
+                      <div className="text-white text-sm font-medium">{user.name}</div>
+                      <div className="text-white/60 text-xs">{user.email}</div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleLogout}
+                      className="text-white/70 hover:text-white hover:bg-white/10 p-1 md:p-2"
+                    >
+                      <Icon name="LogOut" size={14} />
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {/* Mobile search button */}
+                  <Button
+                    variant="ghost" 
+                    size="sm"
+                    className="md:hidden text-white/70 hover:text-white hover:bg-white/10"
+                  >
+                    <Icon name="Search" size={16} />
+                  </Button>
+                  
+                  {/* Auth buttons */}
+                  <Button
+                    onClick={() => setIsAuthOpen(true)}
+                    className="bg-blue-600 hover:bg-blue-700 text-white text-sm px-3 py-2 md:px-4"
+                  >
+                    Войти
+                  </Button>
+                </>
+              )}
             </div>
           </nav>
         </div>
       </header>
 
       {/* Hero Section */}
-      <section className="py-20 text-center animate-fade-in">
+      <section className="py-12 md:py-20 text-center animate-fade-in">
         <div className="container mx-auto px-4">
-          <h2 className="text-5xl font-bold text-white mb-6 animate-slide-up">
+          <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 md:mb-6 animate-slide-up">
             Торгуй игровыми предметами
           </h2>
-          <p className="text-xl text-white/80 mb-8 max-w-2xl mx-auto animate-slide-up">
+          <p className="text-lg md:text-xl text-white/80 mb-6 md:mb-8 max-w-2xl mx-auto animate-slide-up">
             Безопасная торговая площадка для игровых предметов с мгновенными сделками и встроенным чатом
           </p>
-          <div className="flex justify-center space-x-4 animate-scale-in">
-            <Dialog open={isTradeModalOpen} onOpenChange={setIsTradeModalOpen}>
-              <DialogTrigger asChild>
-                <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-8 py-3 text-lg">
+          <div className="flex flex-col sm:flex-row justify-center space-y-3 sm:space-y-0 sm:space-x-4 animate-scale-in">
+            {!user ? (
+              <>
+                <Button 
+                  onClick={() => setIsAuthOpen(true)}
+                  className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-6 md:px-8 py-3 text-base md:text-lg"
+                >
                   Начать торговать
                 </Button>
-              </DialogTrigger>
+                <Dialog open={isTradeModalOpen} onOpenChange={setIsTradeModalOpen}>
+                  <DialogTrigger asChild>
+                    <Button 
+                      variant="outline" 
+                      className="border-white/30 text-white hover:bg-white/10 px-6 md:px-8 py-3 text-base md:text-lg"
+                    >
+                      Как это работает?
+                    </Button>
+                  </DialogTrigger>
+              </>
+            ) : (
+              <div className="text-white/80 text-lg">
+                Добро пожаловать, {user.name}! 🎮
+              </div>
+            )}
+            
+            {!user && (
+              <Dialog open={isTradeModalOpen} onOpenChange={setIsTradeModalOpen}>
+                <DialogTrigger asChild>
+                  <div style={{display: 'none'}} />
+                </DialogTrigger>
               <DialogContent className="bg-slate-900 border-white/20 text-white max-w-2xl">
                 <DialogHeader>
                   <DialogTitle>Добро пожаловать в торговлю!</DialogTitle>
@@ -440,10 +591,10 @@ export default function Index() {
 
 
       {/* Featured Items */}
-      <section className="py-20">
+      <section className="py-12 md:py-20">
         <div className="container mx-auto px-4">
-          <h3 className="text-3xl font-bold text-white mb-12 text-center">Популярные предметы</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <h3 className="text-2xl md:text-3xl font-bold text-white mb-8 md:mb-12 text-center">Популярные предметы</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
             {gameItems.map((item, index) => (
               <Card 
                 key={item.id} 
@@ -723,17 +874,26 @@ export default function Index() {
                   </div>
                 </CardContent>
                 <CardFooter className="flex space-x-2">
-                  <Button 
-                    onClick={() => handlePurchase(item)}
-                    disabled={userBalance < item.price}
-                    className={`flex-1 ${
-                      userBalance >= item.price 
-                        ? 'bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white' 
-                        : 'bg-gray-600 cursor-not-allowed text-white'
-                    }`}
-                  >
-                    {userBalance >= item.price ? 'Купить' : 'Недостаточно средств'}
-                  </Button>
+                  {user ? (
+                    <Button 
+                      onClick={() => handlePurchase(item)}
+                      disabled={userBalance < item.price}
+                      className={`flex-1 ${
+                        userBalance >= item.price 
+                          ? 'bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white' 
+                          : 'bg-gray-600 cursor-not-allowed text-white'
+                      }`}
+                    >
+                      {userBalance >= item.price ? 'Купить' : 'Недостаточно средств'}
+                    </Button>
+                  ) : (
+                    <Button 
+                      onClick={() => setIsAuthOpen(true)}
+                      className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white"
+                    >
+                      Войти для покупки
+                    </Button>
+                  )}
                   <Dialog>
                     <DialogTrigger asChild>
                       <Button variant="outline" className="border-white/30 text-white hover:bg-white/10">
@@ -787,9 +947,9 @@ export default function Index() {
 
 
       {/* Footer */}
-      <footer className="bg-slate-900/50 backdrop-blur-sm border-t border-white/10 py-12">
+      <footer className="bg-slate-900/50 backdrop-blur-sm border-t border-white/10 py-8 md:py-12">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
             <div>
               <h4 className="text-white font-bold mb-4">NapoliFshop</h4>
               <p className="text-white/70 text-sm">
@@ -828,8 +988,8 @@ export default function Index() {
       </footer>
 
       {/* Global Chat */}
-      {isChatOpen && (
-        <div className="fixed bottom-4 right-4 w-96 h-[500px] bg-slate-900/95 backdrop-blur-md border border-white/20 rounded-lg shadow-2xl animate-scale-in z-50">
+      {isChatOpen && user && (
+        <div className="fixed bottom-4 right-4 w-80 md:w-96 h-[500px] max-h-[80vh] bg-slate-900/95 backdrop-blur-md border border-white/20 rounded-lg shadow-2xl animate-scale-in z-50 mx-4 md:mx-0">
           <div className="flex items-center justify-between p-4 border-b border-white/20">
             <div className="flex items-center space-x-2">
               <Icon name="Users" size={20} className="text-blue-400" />
@@ -927,12 +1087,22 @@ export default function Index() {
       )}
 
       {/* Chat Toggle Button */}
-      <Button
-        onClick={() => setIsChatOpen(!isChatOpen)}
-        className="fixed bottom-4 right-4 w-14 h-14 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 shadow-lg z-40"
-      >
-        <Icon name={isChatOpen ? "X" : "MessageCircle"} size={24} className="text-white" />
-      </Button>
+      {user && !isChatOpen && (
+        <Button
+          onClick={() => setIsChatOpen(true)}
+          className="fixed bottom-4 right-4 w-12 h-12 md:w-14 md:h-14 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 shadow-lg z-40"
+        >
+          <Icon name="MessageCircle" size={20} className="md:hidden text-white" />
+          <Icon name="MessageCircle" size={24} className="hidden md:block text-white" />
+        </Button>
+      )}
+
+      {/* Auth Modal */}
+      <AuthModal 
+        isOpen={isAuthOpen} 
+        onClose={() => setIsAuthOpen(false)}
+        onLogin={handleLogin}
+      />
     </div>
   );
 }
